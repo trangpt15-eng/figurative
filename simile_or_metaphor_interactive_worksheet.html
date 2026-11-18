@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simile or Metaphor? - Interactive Worksheet</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Nunito & Quicksand for friendly educational feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti for 12/12 celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdfa; /* Soft teal tint background */
+            background-image: radial-gradient(#ccfbf1 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+
+        h1, h2, .font-display {
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        /* Custom worksheet checkbox styling */
+        .worksheet-box {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .worksheet-box:hover {
+            transform: scale(1.06);
+        }
+
+        /* Blank slot styling */
+        .blank-slot {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 190px;
+            min-height: 36px;
+            border-bottom: 2.5px solid #94a3b8;
+            background-color: #f8fafc;
+            border-radius: 8px 8px 2px 2px;
+            padding: 2px 12px;
+            margin: 2px 4px;
+            vertical-align: middle;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 700;
+            color: #0f766e;
+            user-select: none;
+        }
+
+        @media (max-width: 640px) {
+            .blank-slot {
+                min-width: 150px;
+                font-size: 0.92rem;
+                padding: 2px 8px;
+            }
+        }
+
+        .blank-slot:hover {
+            background-color: #ccfbf1;
+            border-bottom-color: #0d9488;
+        }
+
+        .blank-slot.active-target {
+            background-color: #ccfbf1;
+            border: 2px dashed #0d9488;
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
+        }
+
+        .blank-slot.drag-over {
+            background-color: #99f6e4;
+            border: 2px solid #0f766e;
+            transform: scale(1.03);
+        }
+
+        .blank-slot.filled {
+            background-color: #e6fffa;
+            border-bottom: 2.5px solid #0d9488;
+        }
+
+        .blank-slot.correct {
+            background-color: #dcfce7 !important;
+            border-color: #16a34a !important;
+            color: #15803d !important;
+        }
+
+        .blank-slot.incorrect {
+            background-color: #fee2e2 !important;
+            border-color: #dc2626 !important;
+            color: #b91c1c !important;
+        }
+
+        /* Word bank chip styling */
+        .word-chip {
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .word-chip:not(.used):hover {
+            background-color: #f0fdfa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(13, 148, 136, 0.15);
+        }
+
+        .word-chip.used {
+            opacity: 0.4;
+            background-color: #f1f5f9;
+            color: #94a3b8;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+
+        /* Smooth pop animation */
+        @keyframes popIn {
+            0% { transform: scale(0.92); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.25s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen py-6 px-3 sm:px-6 lg:px-8 text-slate-800">
+
+    <!-- Main Worksheet Container -->
+    <main class="max-w-4xl mx-auto bg-white rounded-3xl shadow-xl border-2 border-teal-500/40 overflow-hidden">
+        
+        <!-- Top Decorative Bar & Header -->
+        <header class="bg-gradient-to-r from-teal-600 via-teal-500 to-emerald-500 px-6 py-6 sm:px-10 text-white relative overflow-hidden">
+            <!-- Decorative background circles -->
+            <div class="absolute -right-8 -top-8 w-36 h-36 rounded-full bg-white/10 pointer-events-none"></div>
+            <div class="absolute right-24 -bottom-10 w-24 h-24 rounded-full bg-white/10 pointer-events-none"></div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 relative z-10">
+                <div>
+                    <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
+                        <span>Figurative Language Practice</span>
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Simile or Metaphor?</h1>
+                </div>
+
+                <!-- Live Score Pill -->
+                <div id="score-badge" class="hidden self-start sm:self-center bg-white text-teal-800 px-5 py-2.5 rounded-2xl shadow-md border-2 border-teal-200 flex items-center gap-3 animate-pop">
+                    <div class="text-right">
+                        <div class="text-xs font-bold uppercase text-teal-600">Your Score</div>
+                        <div class="text-2xl font-extrabold leading-none"><span id="score-value">0</span> / 12</div>
+                    </div>
+                    <div id="score-emoji" class="text-3xl">🌟</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Worksheet Body -->
+        <div class="p-5 sm:p-8 md:p-10 space-y-10">
+
+            <!-- Quick Legend / Tip Banner -->
+            <div class="bg-teal-50/80 border border-teal-200 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm">
+                <div class="flex items-center gap-2.5">
+                    <span class="bg-teal-600 text-white font-extrabold w-7 h-7 rounded-lg flex items-center justify-center shrink-0">M</span>
+                    <span><strong>Metaphor:</strong> Compares two things directly without <em>like</em> or <em>as</em>.</span>
+                </div>
+                <div class="hidden sm:block text-teal-300 font-bold">|</div>
+                <div class="flex items-center gap-2.5">
+                    <span class="bg-emerald-600 text-white font-extrabold w-7 h-7 rounded-lg flex items-center justify-center shrink-0">S</span>
+                    <span><strong>Simile:</strong> Compares two things using <em>like</em> or <em>as</em>.</span>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- PART 1: IDENTIFICATION TABLE               -->
+            <!-- ========================================== -->
+            <section aria-labelledby="part1-heading">
+                <p id="part1-heading" class="text-base sm:text-lg font-bold text-slate-800 mb-4 leading-snug">
+                    Identify whether the sentences below contain a simile or a metaphor by ticking the boxes in the correct column.
+                </p>
+
+                <!-- Table Header Labels (M and S) -->
+                <div class="border-2 border-teal-500 rounded-2xl overflow-hidden shadow-sm">
+                    <!-- Column Header Row -->
+                    <div class="grid grid-cols-[1fr_54px_54px] sm:grid-cols-[1fr_68px_68px] bg-teal-50 border-b-2 border-teal-500 items-center">
+                        <div class="px-4 py-2.5 font-bold text-teal-800 text-sm uppercase tracking-wider">
+                            Sentence
+                        </div>
+                        <div class="py-2.5 text-center font-extrabold text-teal-700 text-lg border-l-2 border-teal-500" title="Metaphor">
+                            M
+                        </div>
+                        <div class="py-2.5 text-center font-extrabold text-teal-700 text-lg border-l-2 border-teal-500" title="Simile">
+                            S
+                        </div>
+                    </div>
+
+                    <!-- Rows Container (Populated by JS) -->
+                    <div id="part1-rows" class="divide-y-2 divide-teal-500 bg-white">
+                        <!-- Dynamic rows go here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- PART 2: SENTENCE COMPLETION & WORD BANK    -->
+            <!-- ========================================== -->
+            <section aria-labelledby="part2-heading" class="pt-2">
+                <p id="part2-heading" class="text-base sm:text-lg font-bold text-slate-800 mb-2 leading-snug">
+                    Now, have a go at completing the sentences by selecting an appropriate simile or metaphor from the box and writing it on the lines provided.
+                </p>
+                <p class="text-xs sm:text-sm text-teal-700 font-semibold mb-5 flex items-center gap-1.5">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Tip: Click a phrase from the box below to fill the highlighted blank, or drag and drop it! Click a filled blank to clear it.</span>
+                </p>
+
+                <!-- Sentences List with Decorative Worksheet Illustrations -->
+                <div class="relative bg-slate-50/60 border border-slate-200 rounded-2xl p-5 sm:p-7 mb-6">
+                    
+                    <!-- Decorative Storm Cloud SVG (Top Right, matching worksheet) -->
+                    <div class="hidden md:block absolute right-6 top-6 opacity-90 pointer-events-none select-none" aria-hidden="true">
+                        <svg width="76" height="72" viewBox="0 0 80 75" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22 44H58C65.732 44 72 37.732 72 30C72 22.845 66.633 16.945 59.708 16.103C57.27 9.058 50.58 4 42.7 4C33.54 4 25.99 10.85 24.85 19.7C23.93 19.57 22.98 19.5 22 19.5C14.268 19.5 8 25.768 8 33.5C8 39.298 11.524 44.274 16.55 46.4" fill="#475569"/>
+                            <path d="M18 42H60C67 42 71 36 70 30C69 24 64 19 58 18C55 10 48 6 40 7C32 8 26 14 25 21C16 21 10 27 10 34C10 39 14 42 18 42Z" fill="#64748B"/>
+                            <!-- Rain streaks -->
+                            <line x1="24" y1="46" x2="20" y2="62" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round"/>
+                            <line x1="34" y1="46" x2="30" y2="65" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round"/>
+                            <line x1="54" y1="46" x2="50" y2="62" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round"/>
+                            <!-- Lightning bolt -->
+                            <path d="M44 43L37 55H43L39 69L51 53H44L47 43H44Z" fill="#FACC15" stroke="#EAB308" stroke-width="1"/>
+                        </svg>
+                    </div>
+
+                    <!-- Decorative Bubbling Cauldron SVG (Middle Right, matching worksheet) -->
+                    <div class="hidden md:block absolute right-6 top-1/2 -translate-y-1/2 opacity-95 pointer-events-none select-none" aria-hidden="true">
+                        <svg width="76" height="82" viewBox="0 0 80 85" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Green bubbles -->
+                            <circle cx="32" cy="14" r="4" fill="#84CC16"/>
+                            <circle cx="44" cy="9" r="3" fill="#A3E635"/>
+                            <circle cx="51" cy="17" r="3.5" fill="#65A30D"/>
+                            <!-- Potion rim -->
+                            <ellipse cx="40" cy="25" rx="19" ry="4" fill="#84CC16"/>
+                            <!-- Cauldron body -->
+                            <path d="M21 25C17 31 15 39 17 47C19 55 28 60 40 60C52 60 61 55 63 47C65 39 63 31 59 25H21Z" fill="#334155"/>
+                            <rect x="19" y="22" width="42" height="5" rx="2.5" fill="#1E293B"/>
+                            <!-- Fire underneath -->
+                            <path d="M28 74C28 67 33 62 35 58C37 63 40 64 41 57C44 62 47 64 48 59C51 64 53 68 52 74H28Z" fill="#F97316"/>
+                            <path d="M33 74C33 69 36 66 38 63C40 67 43 65 44 62C46 66 47 69 47 74H33Z" fill="#FACC15"/>
+                            <!-- Logs -->
+                            <rect x="23" y="73" width="34" height="4" rx="2" fill="#78350F" transform="rotate(-6 23 73)"/>
+                            <rect x="24" y="71" width="34" height="4" rx="2" fill="#92400E" transform="rotate(6 24 71)"/>
+                        </svg>
+                    </div>
+
+                    <!-- Decorative Cherry Blossom Branch SVG (Bottom Right, matching worksheet) -->
+                    <div class="hidden md:block absolute right-4 bottom-3 opacity-95 pointer-events-none select-none" aria-hidden="true">
+                        <svg width="84" height="68" viewBox="0 0 90 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Branch -->
+                            <path d="M86 58C68 50 52 44 26 42" stroke="#78350F" stroke-width="4" stroke-linecap="round"/>
+                            <path d="M58 48C48 38 42 30 34 22" stroke="#78350F" stroke-width="2.5" stroke-linecap="round"/>
+                            <!-- Pink blossom clusters -->
+                            <circle cx="28" cy="38" r="11" fill="#FBCFE8"/>
+                            <circle cx="38" cy="26" r="12" fill="#F9A8D4"/>
+                            <circle cx="52" cy="34" r="13" fill="#FBCFE8"/>
+                            <circle cx="66" cy="42" r="11" fill="#F472B6" fill-opacity="0.6"/>
+                            <circle cx="44" cy="42" r="10" fill="#F9A8D4"/>
+                            <!-- Flower centers -->
+                            <circle cx="38" cy="26" r="2.5" fill="#BE185D"/>
+                            <circle cx="52" cy="34" r="2.5" fill="#BE185D"/>
+                            <circle cx="28" cy="38" r="2" fill="#BE185D"/>
+                        </svg>
+                    </div>
+
+                    <!-- Part 2 Sentences List -->
+                    <ol id="part2-list" class="space-y-5 md:pr-24 text-base sm:text-lg text-slate-800">
+                        <!-- Dynamic sentences go here -->
+                    </ol>
+                </div>
+
+                <!-- Word Bank Grid (Matches the 3x2 teal-bordered box in the worksheet) -->
+                <div aria-label="Word Bank">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-extrabold uppercase tracking-wider text-teal-700">Phrase Bank (Click or Drag)</span>
+                        <span id="remaining-count" class="text-xs font-bold text-slate-500">6 phrases remaining</span>
+                    </div>
+                    <div id="word-bank" class="grid grid-cols-1 sm:grid-cols-3 border-2 border-teal-500 rounded-2xl overflow-hidden bg-white shadow-sm">
+                        <!-- Dynamic word bank chips go here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Feedback Banner (Hidden until Check Answers is clicked) -->
+            <div id="feedback-banner" class="hidden rounded-2xl p-4 sm:p-5 border-2 animate-pop" role="status" aria-live="polite">
+                <div class="flex items-start gap-3.5">
+                    <div id="feedback-icon" class="text-2xl sm:text-3xl mt-0.5"></div>
+                    <div>
+                        <h3 id="feedback-title" class="font-extrabold text-base sm:text-lg"></h3>
+                        <p id="feedback-message" class="text-sm mt-0.5"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons Bar -->
+            <footer class="pt-4 border-t border-slate-200 flex flex-wrap items-center justify-center sm:justify-between gap-3">
+                <div class="flex flex-wrap items-center justify-center gap-3 w-full sm:w-auto">
+                    <button id="btn-check" type="button" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 active:scale-95 text-white font-extrabold px-6 py-3 rounded-xl shadow-md shadow-teal-600/20 transition cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                        <span>Check Answers</span>
+                    </button>
+
+                    <button id="btn-show" type="button" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-amber-50 hover:bg-amber-100 active:scale-95 text-amber-800 border-2 border-amber-300 font-bold px-5 py-2.5 rounded-xl transition cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        <span>Show Answers</span>
+                    </button>
+                </div>
+
+                <button id="btn-reset" type="button" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold px-5 py-3 rounded-xl transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <span>Reset Worksheet</span>
+                </button>
+            </footer>
+
+        </div>
+    </main>
+
+    <script>
+        // ==========================================
+        // WORKSHEET DATA
+        // ==========================================
+        const part1Data = [
+            {
+                id: 1,
+                text: "The giant was as tall as a mountain.",
+                answer: "S",
+                explanation: "Simile: Compares the giant's height to a mountain using 'as ... as'."
+            },
+            {
+                id: 2,
+                text: "Sam woke up to the ground outside covered in a soft, white blanket.",
+                answer: "M",
+                explanation: "Metaphor: Directly calls the snow a 'soft, white blanket' without using 'like' or 'as'."
+            },
+            {
+                id: 3,
+                text: "The bass drum in her chest was getting louder and louder.",
+                answer: "M",
+                explanation: "Metaphor: Directly compares her pounding heart to a 'bass drum'."
+            },
+            {
+                id: 4,
+                text: "Like a mouse, the boy crept down the corridor.",
+                answer: "S",
+                hasMouse: true,
+                explanation: "Simile: Compares the boy's quiet movement to a mouse using 'Like'."
+            },
+            {
+                id: 5,
+                text: "With a sound as loud as a foghorn, the elephant came charging out of the trees.",
+                answer: "S",
+                explanation: "Simile: Compares the elephant's trumpet to a foghorn using 'as ... as'."
+            },
+            {
+                id: 6,
+                text: "The diamond-encrusted spider webs glistened in the early morning sun.",
+                answer: "M",
+                explanation: "Metaphor: Directly describes dewdrops on webs as 'diamond-encrusted' without 'like' or 'as'."
+            }
+        ];
+
+        const part2Data = [
+            {
+                id: 1,
+                before: "The cat hissed ",
+                after: ".",
+                answer: "as angrily as a snake.",
+                displayAnswer: "as angrily as a snake",
+                explanation: "Simile: Uses 'as ... as' to compare the cat's hiss to a snake."
+            },
+            {
+                id: 2,
+                before: "",
+                after: " zig-zagged across the sky during the storm.",
+                answer: "Silver slashes",
+                displayAnswer: "Silver slashes",
+                explanation: "Metaphor: Directly describes lightning bolts as 'Silver slashes'."
+            },
+            {
+                id: 3,
+                before: "",
+                after: " the bubbling cauldron.",
+                answer: "Fiery tongues licked",
+                displayAnswer: "Fiery tongues licked",
+                explanation: "Metaphor: Directly compares flames to 'Fiery tongues'."
+            },
+            {
+                id: 4,
+                before: "The bed felt ",
+                after: " when she finally lay down.",
+                answer: "like fluffy clouds",
+                displayAnswer: "like fluffy clouds",
+                explanation: "Simile: Uses 'like' to compare the soft bed to fluffy clouds."
+            },
+            {
+                id: 5,
+                before: "Outside, ",
+                after: " fell from the sky and pummelled the ground.",
+                answer: "sheets of grey",
+                displayAnswer: "sheets of grey",
+                explanation: "Metaphor: Directly compares heavy rain to 'sheets of grey'."
+            },
+            {
+                id: 6,
+                before: "The cherry blossoms bloomed ",
+                after: ".",
+                answer: "like candy floss on sticks.",
+                displayAnswer: "like candy floss on sticks",
+                explanation: "Simile: Uses 'like' to compare pink blossoms on branches to candy floss on sticks."
+            }
+        ];
+
+        // Word Bank in exact worksheet order (3 columns x 2 rows)
+        const wordBankItems = [
+            "Fiery tongues licked",
+            "like candy floss on sticks.",
+            "Silver slashes",
+            "like fluffy clouds",
+            "sheets of grey",
+            "as angrily as a snake."
+        ];
+
+        // ==========================================
+        // APPLICATION STATE
+        // ==========================================
+        let part1Selections = {}; // { 1: 'S', 2: 'M', ... }
+        let part2Selections = {}; // { 1: 'as angrily as a snake.', ... }
+        let activeSlotId = 1;     // Currently focused blank slot for quick click-to-fill
+        let isChecked = false;
+
+        // ==========================================
+        // RENDER FUNCTIONS
+        // ==========================================
+
+        function renderPart1() {
+            const container = document.getElementById('part1-rows');
+            container.innerHTML = '';
+
+            part1Data.forEach(item => {
+                const selected = part1Selections[item.id] || null;
+                const isCorrect = isChecked && selected === item.answer;
+                const isWrong = isChecked && selected !== item.answer;
+
+                const row = document.createElement('div');
+                row.className = `grid grid-cols-[1fr_54px_54px] sm:grid-cols-[1fr_68px_68px] items-stretch transition-colors ${
+                    isChecked 
+                        ? (isCorrect ? 'bg-green-50/60' : 'bg-red-50/60') 
+                        : 'hover:bg-teal-50/30'
+                }`;
+
+                // Mouse SVG decoration for row 4 (matching original worksheet)
+                const mouseDecoration = item.hasMouse ? `
+                    <span class="inline-block ml-2 align-middle" title="Little mouse">
+                        <svg width="46" height="26" viewBox="0 0 60 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="inline">
+                            <!-- Tail -->
+                            <path d="M44 23C50 23 55 21 58 17" stroke="#F472B6" stroke-width="2" stroke-linecap="round"/>
+                            <!-- Body -->
+                            <ellipse cx="29" cy="18" rx="15" ry="9" fill="#A8A29E"/>
+                            <!-- Head -->
+                            <path d="M10 20C10 15 15 11 22 11V24C15 24 10 22 10 20Z" fill="#A8A29E"/>
+                            <!-- Ears -->
+                            <circle cx="21" cy="10" r="5" fill="#78716C"/>
+                            <circle cx="21" cy="10" r="3" fill="#FBCFE8"/>
+                            <circle cx="25" cy="11" r="4.5" fill="#A8A29E"/>
+                            <circle cx="25" cy="11" r="2.5" fill="#FBCFE8"/>
+                            <!-- Eye & Nose -->
+                            <circle cx="15" cy="17" r="1.5" fill="#1C1917"/>
+                            <circle cx="9.5" cy="20" r="1.5" fill="#F472B6"/>
+                            <!-- Feet -->
+                            <ellipse cx="22" cy="26" rx="3" ry="1.5" fill="#F472B6"/>
+                            <ellipse cx="36" cy="26" rx="3" ry="1.5" fill="#F472B6"/>
+                        </svg>
+                    </span>
+                ` : '';
+
+                // Explanation badge shown after checking
+                const feedbackHtml = isChecked ? `
+                    <div class="mt-1.5 text-xs font-bold flex items-center gap-1.5 ${isCorrect ? 'text-green-700' : 'text-red-700'}">
+                        <span>${isCorrect ? '✓' : '✗'}</span>
+                        <span>${item.explanation}</span>
+                    </div>
+                ` : '';
+
+                row.innerHTML = `
+                    <div class="px-4 py-3.5 flex flex-col justify-center text-base sm:text-lg text-slate-800 leading-snug">
+                        <div>
+                            <span>${item.text}</span>
+                            ${mouseDecoration}
+                        </div>
+                        ${feedbackHtml}
+                    </div>
+
+                    <!-- Column M -->
+                    <div class="border-l-2 border-teal-500 flex items-center justify-center p-2">
+                        <button type="button"
+                            aria-label="Select Metaphor for sentence ${item.id}"
+                            aria-pressed="${selected === 'M'}"
+                            onclick="togglePart1(${item.id}, 'M')"
+                            class="worksheet-box w-8 h-8 sm:w-9 sm:h-9 rounded-md border-2 flex items-center justify-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-400 ${
+                                getBoxClasses(selected === 'M', isChecked, item.answer === 'M')
+                            }">
+                            ${getBoxIcon(selected === 'M', isChecked, item.answer === 'M')}
+                        </button>
+                    </div>
+
+                    <!-- Column S -->
+                    <div class="border-l-2 border-teal-500 flex items-center justify-center p-2">
+                        <button type="button"
+                            aria-label="Select Simile for sentence ${item.id}"
+                            aria-pressed="${selected === 'S'}"
+                            onclick="togglePart1(${item.id}, 'S')"
+                            class="worksheet-box w-8 h-8 sm:w-9 sm:h-9 rounded-md border-2 flex items-center justify-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-400 ${
+                                getBoxClasses(selected === 'S', isChecked, item.answer === 'S')
+                            }">
+                            ${getBoxIcon(selected === 'S', isChecked, item.answer === 'S')}
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(row);
+            });
+        }
+
+        function getBoxClasses(isSelected, checked, isAnswer) {
+            if (!checked) {
+                return isSelected
+                    ? 'border-teal-600 bg-teal-600 text-white shadow-sm'
+                    : 'border-teal-500/70 bg-white hover:bg-teal-50';
+            }
+            if (isSelected && isAnswer) {
+                return 'border-green-600 bg-green-600 text-white';
+            }
+            if (isSelected && !isAnswer) {
+                return 'border-red-600 bg-red-600 text-white';
+            }
+            if (!isSelected && isAnswer) {
+                return 'border-green-500 border-dashed bg-green-50 text-green-700';
+            }
+            return 'border-slate-300 bg-slate-50 opacity-50';
+        }
+
+        function getBoxIcon(isSelected, checked, isAnswer) {
+            if (isSelected) {
+                return `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
+            }
+            if (checked && isAnswer) {
+                return `<svg class="w-4 h-4 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>`;
+            }
+            return '';
+        }
+
+        function renderPart2() {
+            const list = document.getElementById('part2-list');
+            list.innerHTML = '';
+
+            part2Data.forEach(item => {
+                const filledPhrase = part2Selections[item.id] || '';
+                // Clean trailing period if the sentence itself ends with a period so it doesn't look like ".."
+                let displayPhrase = filledPhrase;
+                if (displayPhrase.endsWith('.') && item.after === '.') {
+                    displayPhrase = displayPhrase.slice(0, -1);
+                }
+
+                const isCorrect = isChecked && filledPhrase === item.answer;
+                const isWrong = isChecked && filledPhrase !== item.answer;
+                const isActive = !isChecked && activeSlotId === item.id;
+
+                let slotStateClass = '';
+                if (isChecked) {
+                    slotStateClass = isCorrect ? 'correct' : 'incorrect';
+                } else if (isActive) {
+                    slotStateClass = 'active-target';
+                } else if (filledPhrase) {
+                    slotStateClass = 'filled';
+                }
+
+                const li = document.createElement('li');
+                li.className = 'leading-relaxed';
+
+                const feedbackHtml = isChecked ? `
+                    <div class="mt-1 ml-6 text-xs font-bold ${isCorrect ? 'text-green-700' : 'text-red-700'}">
+                        ${isCorrect 
+                            ? `✓ ${item.explanation}` 
+                            : `✗ Correct phrase: "${item.answer}" (${item.explanation})`
+                        }
+                    </div>
+                ` : '';
+
+                li.innerHTML = `
+                    <div class="flex items-baseline gap-2">
+                        <span class="font-bold text-teal-700 select-none w-5 shrink-0">${item.id}.</span>
+                        <div class="flex-1">
+                            <span>${item.before}</span><span
+                                role="button"
+                                tabindex="0"
+                                aria-label="Blank ${item.id}${filledPhrase ? ': ' + filledPhrase + '. Click to clear' : ': empty. Select to fill'}"
+                                data-slot-id="${item.id}"
+                                onclick="handleSlotClick(${item.id})"
+                                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleSlotClick(${item.id});}"
+                                ondragover="handleDragOver(event)"
+                                ondragleave="handleDragLeave(event)"
+                                ondrop="handleDrop(event, ${item.id})"
+                                class="blank-slot ${slotStateClass}"
+                                title="${filledPhrase ? 'Click to remove phrase' : 'Click to target this blank, or drop a phrase here'}"
+                            >${displayPhrase || '<span class="text-slate-400 font-normal text-xs">click or drop here</span>'}</span><span>${item.after}</span>
+                        </div>
+                    </div>
+                    ${feedbackHtml}
+                `;
+
+                list.appendChild(li);
+            });
+        }
+
+        function renderWordBank() {
+            const bank = document.getElementById('word-bank');
+            bank.innerHTML = '';
+
+            const usedPhrases = new Set(Object.values(part2Selections));
+            const remaining = wordBankItems.length - usedPhrases.size;
+            document.getElementById('remaining-count').textContent =
+                remaining === 1 ? '1 phrase remaining' : `${remaining} phrases remaining`;
+
+            wordBankItems.forEach((phrase, idx) => {
+                const isUsed = usedPhrases.has(phrase);
+
+                const cell = document.createElement('button');
+                cell.type = 'button';
+                cell.disabled = isUsed;
+                cell.draggable = !isUsed;
+                cell.textContent = phrase;
+                cell.setAttribute('aria-label', isUsed ? `${phrase} (already used)` : `Insert phrase: ${phrase}`);
+
+                // Grid border styling to match the 3x2 worksheet box cleanly
+                cell.className = `word-chip py-3.5 px-4 text-center font-bold text-sm sm:text-base text-slate-800 border-teal-500 border-b sm:border-r last:border-b-0 ${
+                    isUsed ? 'used' : 'cursor-pointer active:scale-95'
+                }`;
+
+                if (!isUsed) {
+                    cell.onclick = () => handleWordClick(phrase);
+                    cell.ondragstart = (e) => {
+                        e.dataTransfer.setData('text/plain', phrase);
+                        e.dataTransfer.effectAllowed = 'move';
+                    };
+                }
+
+                bank.appendChild(cell);
+            });
+        }
+
+        function renderAll() {
+            renderPart1();
+            renderPart2();
+            renderWordBank();
+        }
+
+        // ==========================================
+        // INTERACTION HANDLERS
+        // ==========================================
+
+        function clearCheckStateIfNeeded() {
+            if (isChecked) {
+                isChecked = false;
+                document.getElementById('feedback-banner').classList.add('hidden');
+                document.getElementById('score-badge').classList.add('hidden');
+            }
+        }
+
+        function togglePart1(id, choice) {
+            clearCheckStateIfNeeded();
+            if (part1Selections[id] === choice) {
+                delete part1Selections[id];
+            } else {
+                part1Selections[id] = choice;
+            }
+            renderPart1();
+        }
+
+        function handleSlotClick(slotId) {
+            clearCheckStateIfNeeded();
+            if (part2Selections[slotId]) {
+                // Return phrase back to the word bank
+                delete part2Selections[slotId];
+                activeSlotId = slotId;
+            } else {
+                // Focus this empty slot
+                activeSlotId = slotId;
+            }
+            renderPart2();
+            renderWordBank();
+        }
+
+        function handleWordClick(phrase) {
+            clearCheckStateIfNeeded();
+
+            // Determine target slot: use activeSlotId if empty, otherwise find first empty slot
+            let targetId = activeSlotId;
+            if (!targetId || part2Selections[targetId]) {
+                const firstEmpty = part2Data.find(item => !part2Selections[item.id]);
+                targetId = firstEmpty ? firstEmpty.id : 1;
+            }
+
+            part2Selections[targetId] = phrase;
+
+            // Advance activeSlotId to the next available empty slot
+            const nextEmpty = part2Data.find(item => !part2Selections[item.id]);
+            activeSlotId = nextEmpty ? nextEmpty.id : null;
+
+            renderPart2();
+            renderWordBank();
+        }
+
+        // Drag & Drop Handlers
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e, slotId) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            const phrase = e.dataTransfer.getData('text/plain');
+            if (!phrase || !wordBankItems.includes(phrase)) return;
+
+            clearCheckStateIfNeeded();
+
+            // If this phrase was somehow already in another slot, remove it from there
+            for (const key in part2Selections) {
+                if (part2Selections[key] === phrase) {
+                    delete part2Selections[key];
+                }
+            }
+
+            part2Selections[slotId] = phrase;
+
+            const nextEmpty = part2Data.find(item => !part2Selections[item.id]);
+            activeSlotId = nextEmpty ? nextEmpty.id : null;
+
+            renderPart2();
+            renderWordBank();
+        }
+
+        // ==========================================
+        // CHECK, SHOW ANSWERS & RESET
+        // ==========================================
+
+        function checkAnswers() {
+            isChecked = true;
+            let score = 0;
+
+            part1Data.forEach(item => {
+                if (part1Selections[item.id] === item.answer) score++;
+            });
+
+            part2Data.forEach(item => {
+                if (part2Selections[item.id] === item.answer) score++;
+            });
+
+            renderAll();
+
+            // Update Score Badge
+            const scoreBadge = document.getElementById('score-badge');
+            const scoreVal = document.getElementById('score-value');
+            const scoreEmoji = document.getElementById('score-emoji');
+            scoreVal.textContent = score;
+            scoreBadge.classList.remove('hidden');
+
+            // Update Feedback Banner
+            const banner = document.getElementById('feedback-banner');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const msg = document.getElementById('feedback-message');
+
+            banner.classList.remove(
+                'hidden',
+                'bg-green-50', 'border-green-400', 'text-green-900',
+                'bg-amber-50', 'border-amber-400', 'text-amber-900',
+                'bg-teal-50', 'border-teal-400', 'text-teal-900'
+            );
+
+            if (score === 12) {
+                scoreEmoji.textContent = '🏆';
+                banner.classList.add('bg-green-50', 'border-green-400', 'text-green-900');
+                icon.textContent = '🎉';
+                title.textContent = 'Amazing job! 12 out of 12!';
+                msg.textContent = 'You mastered every single simile and metaphor on the worksheet!';
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 90,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                }
+            } else if (score >= 8) {
+                scoreEmoji.textContent = '🌟';
+                banner.classList.add('bg-teal-50', 'border-teal-400', 'text-teal-900');
+                icon.textContent = '👏';
+                title.textContent = `Great effort! You scored ${score} out of 12.`;
+                msg.textContent = 'Review the highlighted feedback above to see why each sentence is a simile or a metaphor.';
+            } else {
+                scoreEmoji.textContent = '💡';
+                banner.classList.add('bg-amber-50', 'border-amber-400', 'text-amber-900');
+                icon.textContent = '📚';
+                title.textContent = `You scored ${score} out of 12. Keep practising!`;
+                msg.textContent = 'Remember: Similes compare using "like" or "as", while metaphors compare directly without them.';
+            }
+
+            banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function showAnswers() {
+            part1Data.forEach(item => {
+                part1Selections[item.id] = item.answer;
+            });
+            part2Data.forEach(item => {
+                part2Selections[item.id] = item.answer;
+            });
+            activeSlotId = null;
+            checkAnswers();
+        }
+
+        function resetWorksheet() {
+            part1Selections = {};
+            part2Selections = {};
+            activeSlotId = 1;
+            isChecked = false;
+
+            document.getElementById('feedback-banner').classList.add('hidden');
+            document.getElementById('score-badge').classList.add('hidden');
+
+            renderAll();
+        }
+
+        // Bind control buttons
+        document.getElementById('btn-check').addEventListener('click', checkAnswers);
+        document.getElementById('btn-show').addEventListener('click', showAnswers);
+        document.getElementById('btn-reset').addEventListener('click', resetWorksheet);
+
+        // Initial render
+        renderAll();
+    </script>
+</body>
+</html>
